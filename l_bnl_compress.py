@@ -43,6 +43,8 @@ options:
                         if given as out_file 
   -s SUM_RANGE, --sum SUM_RANGE
                         an integer image summing range (1 ...) to apply to the selected images
+  -u SIZE ,--uint SIZE
+                        clip the output above 0 and limit to 2 byte or 4 byte integers 
   -v, --verbose         provide addtional information
 
   -V, --version         report the version and build_date
@@ -361,6 +363,8 @@ parser.add_argument('-s','--sum', dest='sum_range', type=int, nargs='?', const=1
    help= 'an integer image summing range (1 ...) to apply to the selected images, defaults to 1')
 parser.add_argument('-v','--verbose',dest='verbose',action='store_true',
    help= 'provide addtional information')
+parser.add_argument('-u','--uint',dest='unit",type=int,nargs='?',const=2, default=2,
+   help= 'clip the output above 0 and limit to 2 byte or 4 byte integers',
 parser.add_argument('-V','--version',dest='report_version',action='store_true',
    help= 'report version and version_date')
 args = vars(parser.parse_args())
@@ -2028,22 +2032,27 @@ for nout_block in range(1,out_number_of_blocks+1):
         fout_squash[nout_block]['entry'].attrs.create('NX_class',ntstr('NXentry'),dtype=ntstrdt('NXentry'))
         fout_squash[nout_block]['entry'].create_group('data')
         fout_squash[nout_block]['entry']['data'].attrs.create('NX_class',ntstr('NXdata'),dtype=ntstrdt('NXdata'))
+    mydata_type='u2'
+    if args['unit']==4:
+        mydata_type='u4'
+    if args['uint']==0
+        mydata_type='i4'
     if args['compression']==None:
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]))
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]))
     elif args['compression']=='bshuf' or args['compression']=='BSHUF':
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]),
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]),
             **hdf5plugin.Bitshuffle(nelems=0,cname='none'))
     elif args['compression']=='bslz4' or args['compression']=='BSLZ4':
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]),
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]),
             **hdf5plugin.Bitshuffle(nelems=0,cname='lz4'))
     elif args['compression']=='bszstd' or args['compression']=='BSZSTD':
         if args['compression_level'] == None:
@@ -2057,7 +2066,7 @@ for nout_block in range(1,out_number_of_blocks+1):
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]),
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]),
             **hdf5plugin.Bitshuffle(nelems=0,cname='zstd',clevel=clevel))
     elif args['compression']=='zstd' or args['compression']=='ZSTD':
         if args['compression_level'] == None:
@@ -2071,14 +2080,14 @@ for nout_block in range(1,out_number_of_blocks+1):
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]),
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]),
             **hdf5plugin.Blosc(cname='zstd',clevel=clevel,shuffle=hdf5plugin.Blosc.NOSHUFFLE))
     else:
         print('l_bnl_compress.py: unrecognized compression, reverting to bslz4')
         fout[nout_block]['entry']['data'].create_dataset('data',
             shape=((lim_nout_image-nout_image),nout_data_shape[0],nout_data_shape[1]),
             maxshape=(None,nout_data_shape[0],nout_data_shape[1]),
-            dtype='u2',chunks=(1,nout_data_shape[0],nout_data_shape[1]),
+            dtype=mydata_type,chunks=(1,nout_data_shape[0],nout_data_shape[1]),
             **hdf5plugin.Bitshuffle(nelems=0,cname='lz4'))
     fout[nout_block]['entry']['data']['data'].attrs.create('image_nr_low',dtype=np.uint64,
         data=np.uint64(image_nr_low))

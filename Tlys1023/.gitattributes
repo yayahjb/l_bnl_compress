@@ -1,5 +1,0 @@
-tlys-1023_14689_data_000002.h5.bz2 filter=lfs diff=lfs merge=lfs -text
-tlys-1023_14689_data_000003.h5.bz2 filter=lfs diff=lfs merge=lfs -text
-tlys-1023_14689_data_000004.h5.bz2 filter=lfs diff=lfs merge=lfs -text
-tlys-1023_14689_master.h5.bz2 filter=lfs diff=lfs merge=lfs -text
-tlys-1023_14689_data_000001.h5.bz2 filter=lfs diff=lfs merge=lfs -text
